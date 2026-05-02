@@ -44,7 +44,7 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-### 4. Instalar las dependencias
+### 5. Instalar las dependencias
 
 Con el entorno activado, instala las librerías requeridas ejecutando:
 
@@ -52,7 +52,7 @@ Con el entorno activado, instala las librerías requeridas ejecutando:
 pip install -r requirements.txt
 ```
 
-### 5. Ejecutar el sistema
+### 6. Ejecutar el sistema
 
 El proyecto cuenta con un servidor de recolección de datos y una interfaz gráfica de monitoreo.
 
