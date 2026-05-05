@@ -32,7 +32,8 @@ try:
         datos_falsos = {
             "fecha_hora": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "humo": round(base_humo, 2),
-            "fuego": 0,
+            "fuego_raw": 4095,
+            "fuego_bool": False,
             "temperatura": round(base_temp, 2),
             "presion": round(base_presion, 2),
             "servo": angulo,
