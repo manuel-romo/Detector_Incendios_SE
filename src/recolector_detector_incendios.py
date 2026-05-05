@@ -17,52 +17,44 @@ BUFFER_SIZE = 4096
 
 
 def guardar_datos(datos: dict) -> None:
-    """Valida e inserta un registro de sensores en la base de datos."""
     campos_esperados = [
-        "fecha_hora",
-        "humo",
-        "fuego",
-        "temperatura",
-        "presion",
-        "servo",
-        "led",
+        "fecha_hora", "humo", "fuego_raw", "fuego_bool", 
+        "temperatura", "presion", "servo", "led"
     ]
 
     if not all(campo in datos for campo in campos_esperados):
-        print(f"[BD] Error: JSON incompleto. Datos recibidos: {datos}")
+        print(f"[BD] Error: JSON incompleto.")
         return
 
-    conexion = None
-    cursor = None
     try:
         conexion = obtener_conexion()
         cursor = conexion.cursor()
 
         consulta = """
-            INSERT INTO registro_sensores
-            (fecha_hora, humo_mq2, fuego_detectado, temperatura, presion, estado_servo, estado_led)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO registro_sensores 
+            (fecha_hora, humo_mq2, fuego_raw, incendio_confirmado, temperatura, presion, estado_servo, estado_led) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
         valores = (
             datos["fecha_hora"],
             datos["humo"],
-            datos["fuego"],
+            datos["fuego_raw"],
+            datos["fuego_bool"],
             datos["temperatura"],
             datos["presion"],
             datos["servo"],
-            datos["led"],
+            datos["led"]
         )
 
         cursor.execute(consulta, valores)
         conexion.commit()
-        print("[BD] Registro guardado exitosamente.")
+        print(f"[BD] Registro guardado (Fuego Raw: {datos['fuego_raw']})")
 
     except mysql.connector.Error as err:
-        print(f"[BD] Error de base de datos: {err}")
+        print(f"[BD] Error: {err}")
     finally:
-        if cursor:
+        if 'conexion' in locals() and conexion.is_connected():
             cursor.close()
-        if conexion and conexion.is_connected():
             conexion.close()
 
 

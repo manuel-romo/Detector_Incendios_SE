@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema Detector de Incendios</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="titulo-estado">Estado Normal del Sistema</h1>
+      <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">
+        Última lectura: <span id="fecha_hora">--</span>
+      </p>
+
+      <div class="grid">
+        <div class="card" id="card-sensores">
+          <h2>Sensores en Tiempo Real</h2>
+          <div class="data-row"><span>Temperatura:</span> <span class="value" id="val_temp">--</span></div>
+          <div class="data-row"><span>Densidad de Humo:</span> <span class="value" id="val_humo">--</span></div>
+          <div class="data-row"><span>Radiación IR:</span> <span class="value" id="val_ir">--</span></div>
+          <div class="data-row"><span>Presión Atm:</span> <span class="value" id="val_presion">--</span></div>
+        </div>
+
+        <div class="card" id="card-actuadores">
+          <h2>Estado de Actuadores</h2>
+          <div class="data-row"><span>Posición del Servo:</span> <span class="value" id="val_servo">--</span></div>
+          <div class="data-row"><span>Barrido Automático:</span> <span class="value" id="val_barrido">--</span></div>
+          <div class="data-row"><span>Detección de Fuego:</span> <span class="value" id="val_fuego_ir">--</span></div>
+          <div class="data-row"><span>Estado de Alarma:</span> <span class="value" id="val_alarma">--</span></div>
+        </div>
+
+        <div class="card" id="card-configuracion">
+          <h2>Parámetros Operativos</h2>
+          <div class="data-row"><span>Límite de Escaneo Mín.:</span> <span class="value" id="conf_ang_min">--</span></div>
+          <div class="data-row"><span>Límite de Escaneo Máx.:</span> <span class="value" id="conf_ang_max">--</span></div>
+          <div class="data-row"><span>Retardo de Paso:</span> <span class="value" id="conf_vel_servo">--</span></div>
+          <div class="data-row"><span>Umbral Radiación IR:</span> <span class="value" id="conf_umb_ir">--</span></div>
+          <div class="data-row"><span>Umbral Partículas (Humo):</span> <span class="value" id="conf_umb_gas">--</span></div>
+          <div class="data-row"><span>Umbral Temperatura:</span> <span class="value" id="conf_umb_temp">--</span></div>
+          <div class="data-row"><span>Umbral Presión:</span> <span class="value" id="conf_umb_pres">--</span></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
