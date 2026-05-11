@@ -16,10 +16,10 @@
       <div class="grid">
         <div class="card" id="card-sensores">
           <h2>Sensores en Tiempo Real</h2>
-          <div class="data-row"><span>Temperatura:</span> <span class="value" id="val_temp">--</span></div>
-          <div class="data-row"><span>Densidad de Humo:</span> <span class="value" id="val_humo">--</span></div>
-          <div class="data-row"><span>Radiación IR:</span> <span class="value" id="val_ir">--</span></div>
-          <div class="data-row"><span>Presión Atm:</span> <span class="value" id="val_presion">--</span></div>
+          <div class="data-row"><span>Temperatura:<span class="tooltip">?<span class="tooltiptext">Valores más altos (> 60°C) indican un calor anormal o fuego cercano. Valores bajos reflejan el clima local.</span></span></span> <span class="value" id="val_temp">--</span></div>
+          <div class="data-row"><span>Densidad de Humo:<span class="tooltip">?<span class="tooltiptext">Valores más altos indican mayor concentración de humo o gases combustibles. Valores bajos indican aire limpio.</span></span></span> <span class="value" id="val_humo">--</span></div>
+          <div class="data-row"><span>Radiación IR:<span class="tooltip">?<span class="tooltiptext">Valores más altos (cerca de 100%) confirman la fuerte presencia de una llama. Valores bajos indican que no hay fuego.</span></span></span> <span class="value" id="val_ir">--</span></div>
+          <div class="data-row"><span>Presión Atm:<span class="tooltip">?<span class="tooltiptext">Valores más bajos pueden indicar un sistema de tormenta, mientras que corrientes térmicas por fuego pueden causar fluctuaciones.</span></span></span> <span class="value" id="val_presion">--</span></div>
         </div>
 
         <div class="card" id="card-actuadores">

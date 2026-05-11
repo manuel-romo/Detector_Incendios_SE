@@ -25,6 +25,30 @@ CARD_BG = "#2b2b2b"
 TEXT_MUTED = "#8a8a8a"
 COLOR_ALERTA = "#e74c3c"
 
+class ToolTip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.close)
+        self.tw = None
+
+    def enter(self, event=None):
+        x = self.widget.winfo_rootx() + 20
+        y = self.widget.winfo_rooty() + 20
+        self.tw = tk.Toplevel(self.widget)
+        self.tw.wm_overrideredirect(True)
+        self.tw.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(self.tw, text=self.text, justify='left',
+                         background="#2b2b2b", foreground="#e0e0e0", relief='solid', borderwidth=1, highlightbackground="#3d3d3d",
+                         font=("Arial", 10, "normal"), wraplength=220)
+        label.pack(ipadx=8, ipady=8)
+
+    def close(self, event=None):
+        if self.tw:
+            self.tw.destroy()
+            self.tw = None
+
 class InterfazDetector(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -86,10 +110,10 @@ class InterfazDetector(ctk.CTk):
             ("Límite de Escaneo Mín. (0-180°)", "angulo_minimo", "Ej: 0"),
             ("Límite de Escaneo Máx. (0-180°)", "angulo_maximo", "Ej: 180"),
             ("Retardo de Paso (ms) [30-200]", "velocidad_servo", "Ej: 30"),
-            ("Umbral de Radiación IR [0-4095]", "limite_distancia_ir", "Ej: 2000"),
+            ("Umbral de Radiación IR (0-100%)", "limite_distancia_ir", "Ej: 50.0"),
             ("Umbral de Partículas [0-4095]", "limite_gas", "Ej: 2000"),
             ("Umbral de Temperatura [0-100]", "limite_temperatura", "Ej: 60.0"),
-            ("Umbral de Presión [50k-150k]", "limite_presion", "Ej: 100000")
+            ("Umbral de Presión [500-1500 hPa]", "limite_presion", "Ej: 1013.2")
         ]
 
         for i, (label_text, key, placeholder) in enumerate(parametros):
@@ -134,19 +158,28 @@ class InterfazDetector(ctk.CTk):
         self.frames_tarjetas = []
         
         metricas_info = [
-            ("Densidad de Humo", "humo", "0.0"),
-            ("Radiación IR", "llama", "4095"),
-            ("Temperatura", "temp", "0.0 °C"),
-            ("Presión Atmosférica", "pres", "0 hPa")
+            ("Densidad de Humo", "humo", "0.0", "Valores más altos indican mayor concentración de humo o gases combustibles. Valores bajos indican aire limpio."),
+            ("Radiación IR", "llama", "0.0 %", "Valores más altos (cerca de 100%) confirman la fuerte presencia de una llama. Valores bajos indican que no hay fuego."),
+            ("Temperatura", "temp", "0.0 °C", "Valores más altos (> 60°C) indican un calor anormal o fuego cercano. Valores bajos reflejan el clima local."),
+            ("Presión Atmosférica", "pres", "0.0 hPa", "Valores más bajos pueden indicar un sistema de tormenta, mientras que corrientes térmicas por fuego pueden causar fluctuaciones.")
         ]
 
-        for i, (titulo, clave, valor_def) in enumerate(metricas_info):
+        for i, (titulo, clave, valor_def, info_text) in enumerate(metricas_info):
             # Se añade borde inactivo
             card = ctk.CTkFrame(self.cards_frame, fg_color=CARD_BG, corner_radius=12, border_width=2, border_color=CARD_BG)
             card.grid(row=0, column=i, sticky="nsew", padx=5)
             self.frames_tarjetas.append(card)
             
-            ctk.CTkLabel(card, text=titulo, text_color=TEXT_MUTED, font=ctk.CTkFont(size=13, weight="bold")).pack(pady=(15, 0))
+            # Contenedor para el titulo y el botón de información
+            header_frame = ctk.CTkFrame(card, fg_color="transparent")
+            header_frame.pack(pady=(15, 0))
+            
+            ctk.CTkLabel(header_frame, text=titulo, text_color=TEXT_MUTED, font=ctk.CTkFont(size=13, weight="bold")).pack(side="left")
+            
+            btn_info = ctk.CTkLabel(header_frame, text="?", text_color="#3498db", font=ctk.CTkFont(size=13, weight="bold"), cursor="hand2")
+            btn_info.pack(side="left", padx=(5, 0))
+            ToolTip(btn_info, text=info_text)
+
             lbl_val = ctk.CTkLabel(card, text=valor_def, font=ctk.CTkFont(size=24, weight="bold"))
             lbl_val.pack(pady=(5, 15))
             self.lbl_vars[clave] = lbl_val
@@ -318,10 +351,14 @@ class InterfazDetector(ctk.CTk):
             self.tiempo_ultima_actualizacion = time.time()
             self.detector_online = True
             
+            # Convertir a porcentajes y unidades amigables
+            ir_pct = (1.0 - (float(data['fuego_raw']) / 4095.0)) * 100.0
+            pres_hpa = float(data['presion']) / 100.0
+            
             self.lbl_vars["humo"].configure(text=f"{data['humo_mq2']}")
-            self.lbl_vars["llama"].configure(text=f"{data['fuego_raw']}")
-            self.lbl_vars["temp"].configure(text=f"{data['temperatura']} °C")
-            self.lbl_vars["pres"].configure(text=f"{data['presion']} hPa")
+            self.lbl_vars["llama"].configure(text=f"{ir_pct:.1f} %")
+            self.lbl_vars["temp"].configure(text=f"{float(data['temperatura']):.1f} °C")
+            self.lbl_vars["pres"].configure(text=f"{pres_hpa:.1f} hPa")
             
             if historico:
                 self._dibujar_grafica(historico, self.periodo_grafica_var.get(), self.metrica_grafica_var.get())
@@ -497,6 +534,15 @@ class InterfazDetector(ctk.CTk):
                 "angulo_maximo": config.get("angulo_maximo", "")  
             }
 
+            # Convertir formato crudo a unidades amigables para la UI
+            if datos_planos["limite_distancia_ir"] != "":
+                ir_raw = float(datos_planos["limite_distancia_ir"])
+                datos_planos["limite_distancia_ir"] = f"{(1.0 - (ir_raw / 4095.0)) * 100.0:.1f}"
+            
+            if datos_planos["limite_presion"] != "":
+                pres_raw = float(datos_planos["limite_presion"])
+                datos_planos["limite_presion"] = f"{pres_raw / 100.0:.1f}"
+
             for key, entry in self.entradas_config.items():
                 if key in datos_planos and str(datos_planos[key]) != "":
                     entry.delete(0, tk.END)
@@ -520,23 +566,33 @@ class InterfazDetector(ctk.CTk):
             if valor != "":
                 try:
                     val_float = float(valor)
+                    val_ui = val_float
                     
                     if key in ["angulo_minimo", "angulo_maximo"]:
                         val_final = int(max(0, min(180, val_float)))
+                        val_ui = val_final
                     elif key == "velocidad_servo":
                         val_final = int(max(30, min(200, val_float)))
-                    elif key in ["limite_distancia_ir", "limite_gas"]:
+                        val_ui = val_final
+                    elif key == "limite_distancia_ir":
+                        val_ui = float(max(0.0, min(100.0, val_float)))
+                        val_final = int((1.0 - (val_ui / 100.0)) * 4095.0)
+                    elif key == "limite_gas":
                         val_final = int(max(0, min(4095, val_float)))
+                        val_ui = val_final
                     elif key == "limite_temperatura":
                         val_final = float(max(-40.0, min(150.0, val_float)))
+                        val_ui = val_final
                     elif key == "limite_presion":
-                        val_final = int(max(50000, min(150000, val_float)))
+                        val_ui = float(max(500.0, min(1500.0, val_float)))
+                        val_final = int(val_ui * 100)
                     else:
                         val_final = val_float
+                        val_ui = val_float
 
-                    if str(val_final) != valor and str(float(val_final)) != valor:
+                    if str(val_ui) != valor and str(float(val_ui)) != valor:
                         entry.delete(0, tk.END)
-                        entry.insert(0, str(val_final))
+                        entry.insert(0, str(val_ui))
                         
                     payload[key] = val_final
                     

@@ -6,10 +6,13 @@ setInterval(() => {
       document.getElementById("fecha_hora").innerText = data.fecha_hora;
 
       // Datos sensados
+      const ir_pct = (1.0 - (data.sensores.llama_cruda / 4095.0)) * 100.0;
+      const pres_hpa = data.sensores.presion_Pa / 100.0;
+
       document.getElementById("val_temp").innerText = data.sensores.temperatura_C.toFixed(1) + " °C";
       document.getElementById("val_humo").innerText = data.sensores.gas_crudo.toFixed(1);
-      document.getElementById("val_ir").innerText = data.sensores.llama_cruda;
-      document.getElementById("val_presion").innerText = data.sensores.presion_Pa + " Pa";
+      document.getElementById("val_ir").innerText = ir_pct.toFixed(1) + " %";
+      document.getElementById("val_presion").innerText = pres_hpa.toFixed(1) + " hPa";
       
       document.getElementById("val_servo").innerText = data.estado.servo_angulo_actual + "°";
       document.getElementById("val_barrido").innerText = data.configuracion.barrido_automatico ? "Activo" : "Inactivo";
@@ -52,13 +55,16 @@ setInterval(() => {
       }
 
       // Parámetros de configuración
+      const conf_ir_pct = (1.0 - (data.configuracion.limite_distancia_ir / 4095.0)) * 100.0;
+      const conf_pres_hpa = data.configuracion.limite_presion / 100.0;
+
       document.getElementById("conf_ang_min").innerText = data.configuracion.angulo_minimo + "°";
       document.getElementById("conf_ang_max").innerText = data.configuracion.angulo_maximo + "°";
       document.getElementById("conf_vel_servo").innerText = data.configuracion.velocidad_servo + " ms";
-      document.getElementById("conf_umb_ir").innerText = data.configuracion.limite_distancia_ir;
+      document.getElementById("conf_umb_ir").innerText = conf_ir_pct.toFixed(1) + " %";
       document.getElementById("conf_umb_gas").innerText = data.configuracion.limite_gas;
-      document.getElementById("conf_umb_temp").innerText = data.configuracion.limite_temperatura.toFixed(1);
-      document.getElementById("conf_umb_pres").innerText = data.configuracion.limite_presion;
+      document.getElementById("conf_umb_temp").innerText = data.configuracion.limite_temperatura.toFixed(1) + " °C";
+      document.getElementById("conf_umb_pres").innerText = conf_pres_hpa.toFixed(1) + " hPa";
 
     })
     .catch(error => console.error("Error obteniendo datos del ESP32:", error));
