@@ -8,9 +8,10 @@ setInterval(() => {
       // Datos sensados
       const ir_pct = (1.0 - (data.sensores.llama_cruda / 4095.0)) * 100.0;
       const pres_hpa = data.sensores.presion_Pa / 100.0;
+      const humo_ppm = (data.sensores.gas_crudo / 4095.0) * 10000.0;
 
       document.getElementById("val_temp").innerText = data.sensores.temperatura_C.toFixed(1) + " °C";
-      document.getElementById("val_humo").innerText = data.sensores.gas_crudo.toFixed(1);
+      document.getElementById("val_humo").innerText = humo_ppm.toFixed(0) + " ppm";
       document.getElementById("val_ir").innerText = ir_pct.toFixed(1) + " %";
       document.getElementById("val_presion").innerText = pres_hpa.toFixed(1) + " hPa";
       
@@ -62,7 +63,8 @@ setInterval(() => {
       document.getElementById("conf_ang_max").innerText = data.configuracion.angulo_maximo + "°";
       document.getElementById("conf_vel_servo").innerText = data.configuracion.velocidad_servo + " ms";
       document.getElementById("conf_umb_ir").innerText = conf_ir_pct.toFixed(1) + " %";
-      document.getElementById("conf_umb_gas").innerText = data.configuracion.limite_gas;
+      const conf_gas_ppm = (data.configuracion.limite_gas / 4095.0) * 10000.0;
+      document.getElementById("conf_umb_gas").innerText = conf_gas_ppm.toFixed(0) + " ppm";
       document.getElementById("conf_umb_temp").innerText = data.configuracion.limite_temperatura.toFixed(1) + " °C";
       document.getElementById("conf_umb_pres").innerText = conf_pres_hpa.toFixed(1) + " hPa";
 

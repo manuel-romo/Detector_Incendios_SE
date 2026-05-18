@@ -111,7 +111,7 @@ class InterfazDetector(ctk.CTk):
             ("Límite de Escaneo Máx. (0-180°)", "angulo_maximo", "Ej: 180"),
             ("Retardo de Paso (ms) [30-200]", "velocidad_servo", "Ej: 30"),
             ("Umbral de Radiación IR (0-100%)", "limite_distancia_ir", "Ej: 50.0"),
-            ("Umbral de Partículas [0-4095]", "limite_gas", "Ej: 2000"),
+            ("Umbral de Partículas (ppm) [0-10000]", "limite_gas", "Ej: 4880"),
             ("Umbral de Temperatura [0-100]", "limite_temperatura", "Ej: 60.0"),
             ("Umbral de Presión [500-1500 hPa]", "limite_presion", "Ej: 1013.2")
         ]
@@ -354,8 +354,9 @@ class InterfazDetector(ctk.CTk):
             # Convertir a porcentajes y unidades amigables
             ir_pct = (1.0 - (float(data['fuego_raw']) / 4095.0)) * 100.0
             pres_hpa = float(data['presion']) / 100.0
+            humo_ppm = (float(data['humo_mq2']) / 4095.0) * 10000.0
             
-            self.lbl_vars["humo"].configure(text=f"{data['humo_mq2']}")
+            self.lbl_vars["humo"].configure(text=f"{humo_ppm:.0f} ppm")
             self.lbl_vars["llama"].configure(text=f"{ir_pct:.1f} %")
             self.lbl_vars["temp"].configure(text=f"{float(data['temperatura']):.1f} °C")
             self.lbl_vars["pres"].configure(text=f"{pres_hpa:.1f} hPa")
@@ -539,6 +540,10 @@ class InterfazDetector(ctk.CTk):
                 ir_raw = float(datos_planos["limite_distancia_ir"])
                 datos_planos["limite_distancia_ir"] = f"{(1.0 - (ir_raw / 4095.0)) * 100.0:.1f}"
             
+            if datos_planos.get("limite_gas") and str(datos_planos["limite_gas"]) != "":
+                gas_raw = float(datos_planos["limite_gas"])
+                datos_planos["limite_gas"] = f"{(gas_raw / 4095.0) * 10000.0:.0f}"
+
             if datos_planos["limite_presion"] != "":
                 pres_raw = float(datos_planos["limite_presion"])
                 datos_planos["limite_presion"] = f"{pres_raw / 100.0:.1f}"
@@ -578,8 +583,8 @@ class InterfazDetector(ctk.CTk):
                         val_ui = float(max(0.0, min(100.0, val_float)))
                         val_final = int((1.0 - (val_ui / 100.0)) * 4095.0)
                     elif key == "limite_gas":
-                        val_final = int(max(0, min(4095, val_float)))
-                        val_ui = val_final
+                        val_ui = float(max(0.0, min(10000.0, val_float)))
+                        val_final = int((val_ui / 10000.0) * 4095.0)
                     elif key == "limite_temperatura":
                         val_final = float(max(-40.0, min(150.0, val_float)))
                         val_ui = val_final
